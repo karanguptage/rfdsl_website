@@ -1,6 +1,97 @@
 import Image from "next/image";
 import HeroMesh from "@/components/HeroMesh";
 import IndustryGrid, { type IndustryItem } from "@/components/IndustryGrid";
+import ProductCarousel, { type Product } from "@/components/ProductCarousel";
+
+// Products shown in the "most popular products" carousel (images in public/products).
+// `description` appears over the image on hover; `href` is the product's page
+// (opened by a click or tap). Product pages don't exist yet, so links show the
+// "Page not found" page until they're added.
+const POPULAR_PRODUCTS: Product[] = [
+  {
+    name: "AdvanReader-10",
+    src: "/products/AdvanReader-10.png",
+    href: "/products/advanreader-10",
+    description:
+      "A compact UHF RFID reader with USB connectivity and optional integrated antenna, ideal for embedded systems, access control and IoT applications.",
+  },
+  {
+    name: "AdvanReader-70",
+    src: "/products/AdvanReader-70.png",
+    href: "/products/advanreader-70",
+    description:
+      "A standalone UHF RFID reader with integrated Linux computing, suitable for RFID portals, smart surfaces and automated inventory systems.",
+  },
+  {
+    name: "AdvanReader-160",
+    src: "/products/AdvanReader-160.png",
+    href: "/products/advanreader-160",
+    description:
+      "A powerful four-port UHF RFID reader designed for multi-antenna applications, industrial automation and large-scale asset tracking.",
+  },
+  {
+    name: "C5",
+    src: "/products/C5.jpg",
+    href: "/products/c5",
+    description:
+      "A rugged Android handheld RFID reader combining UHF tag identification, barcode scanning and NFC capabilities for efficient inventory and asset management.",
+  },
+  {
+    name: "C61",
+    src: "/products/C61.jpg",
+    href: "/products/c61",
+    description:
+      "A high-performance handheld UHF RFID reader offering fast, long-range tag identification for retail, warehousing and logistics.",
+  },
+  {
+    name: "CP20",
+    src: "/products/CP20.jpg",
+    href: "/products/cp20",
+    description:
+      "A compact thermal barcode printer supporting direct thermal and thermal transfer printing, ideal for product labels, shipping and inventory identification.",
+  },
+  {
+    name: "CP30",
+    src: "/products/CP30.jpg",
+    href: "/products/cp30",
+    description:
+      "A professional RFID and barcode printer offering accurate label printing and RFID encoding for logistics, warehousing and asset management.",
+  },
+  {
+    name: "Customised RFID Tags",
+    src: "/products/CustomisedRFIDTags.png",
+    href: "/products/customised-rfid-tags",
+    description:
+      "Custom-designed RFID tags available in various sizes, materials, shapes and frequencies to meet specific product identification and tracking requirements.",
+  },
+  {
+    // Description to follow once the product specifications are confirmed.
+    name: "GP60333",
+    src: "/products/gp60333.jpg",
+    href: "/products/gp60333",
+  },
+  {
+    name: "MC50",
+    src: "/products/MC50.jpg",
+    href: "/products/mc50",
+    description:
+      "A 5G-enabled handheld RFID computer featuring long-range reading and a detachable RFID module for demanding industrial and logistics applications.",
+  },
+  {
+    name: "MC95",
+    src: "/products/MC95.jpg",
+    href: "/products/mc95",
+    description:
+      "A versatile mobile computer with UHF RFID capabilities, designed for inventory management, asset tracking and field operations.",
+  },
+  {
+    name: "ZT411",
+    src: "/products/ZT411.jpg",
+    href: "/products/zt411",
+    description:
+      "An industrial-grade label printer with optional RFID encoding, designed for high-volume printing in manufacturing, logistics and warehousing.",
+  },
+];
 
 // Industry images shown below the banner: a label along the bottom edge, and a
 // description typed out over the image on hover (or tap on touch screens).
@@ -128,6 +219,8 @@ export default function Home() {
           </div>
           <span aria-hidden="true" className="mb-[0.9em] hidden h-px flex-1 bg-linear-to-r from-slate-300 to-transparent sm:block" />
         </div>
+
+        <ProductCarousel products={POPULAR_PRODUCTS} className="mt-8 lg:mt-10" />
       </section>
     </main>
   );
