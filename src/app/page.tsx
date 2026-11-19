@@ -235,7 +235,7 @@ export default function Home() {
         */}
         <div className="pointer-events-none relative mx-4 my-4 aspect-[3/2] md:absolute md:inset-auto md:top-8 md:right-6 md:bottom-0 md:left-1/2 md:m-0 md:aspect-auto">
           <Image
-            src="/images/banner_img.webp"
+            src="/images/banner_img.png"
             alt="RFID specialist with a handheld scanner, next to an RFID reader, tags and an asset-tracking dashboard"
             fill
             sizes="(min-width: 1536px) 768px, (min-width: 768px) 50vw, 100vw"
