@@ -200,19 +200,34 @@ export const LEGAL_DOCS: LegalDoc[] = [
           to work securely and correctly; these do not identify you personally.
         </P>
 
-        <H>2. Analytics</H>
+        <H>2. Embedded maps</H>
+        <P>
+          Our About Us page shows an embedded Google Map so you can see where we are. When the map loads, Google may set
+          its own cookies, which are covered by{" "}
+          <a
+            href="https://policies.google.com/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-blue-700 underline-offset-2 hover:underline"
+          >
+            Google&apos;s Privacy Policy
+          </a>
+          .
+        </P>
+
+        <H>3. Analytics</H>
         <P>
           If we introduce website analytics in the future to understand how visitors use the site, we will update this
           policy first and ask for your consent where required.
         </P>
 
-        <H>3. Managing cookies</H>
+        <H>4. Managing cookies</H>
         <P>
           You can block or delete cookies in your browser settings. Blocking strictly necessary cookies may stop parts of
           the website from working properly.
         </P>
 
-        <H>4. Contact</H>
+        <H>5. Contact</H>
         <P>If you have any questions about this policy, please contact us:</P>
         <Contact />
       </>

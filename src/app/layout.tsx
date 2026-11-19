@@ -78,6 +78,7 @@ const STRUCTURED_DATA = {
         streetAddress: SITE.address.street,
         addressLocality: SITE.address.locality,
         addressRegion: SITE.address.region,
+        postalCode: SITE.address.postalCode,
         addressCountry: SITE.address.country,
       },
       areaServed: { "@type": "Country", name: "New Zealand" },

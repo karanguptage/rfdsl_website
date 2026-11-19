@@ -10,9 +10,7 @@ const NAV_ITEMS = [
   { label: "Home", href: "/" },
   { label: "Products", href: "/products" },
   { label: "Solutions", href: "/solutions" },
-  { label: "Industries", href: "/industries" },
   { label: "About Us", href: "/about" },
-  { label: "Contact", href: "/contact" },
 ];
 
 function isActive(pathname: string, href: string) {

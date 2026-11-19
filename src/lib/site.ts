@@ -18,6 +18,7 @@ export const SITE = {
     street: "5C Target Court, Wairau Valley",
     locality: "Auckland",
     region: "Auckland",
+    postalCode: "0627",
     country: "NZ",
   },
   // Search terms the business wants to be found for (also used in structured data).
