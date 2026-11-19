@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+// Not indexed by search engines (links on it are still followed).
+export const metadata: Metadata = {
+  title: "Page not found",
+  robots: { index: false, follow: true },
+};
 
 // Shown for any URL without a page. It only fills the space below the header
 // (Next.js's built-in 404 is a full 100vh tall, which overflowed the window).

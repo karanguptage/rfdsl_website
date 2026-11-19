@@ -27,7 +27,11 @@ export default function IndustryGrid({ items, className }: { items: IndustryItem
   };
 
   return (
-    <section aria-label="Industries" className={className}>
+    <section aria-labelledby={`${baseId}-title`} className={className}>
+      {/* Section heading for search engines and screen readers (the images speak for themselves visually). */}
+      <h2 id={`${baseId}-title`} className="sr-only">
+        RFID asset tracking by industry
+      </h2>
       {items.map((item, index) => {
         const isActive = active === index;
         const descriptionId = `${baseId}-${index}`;

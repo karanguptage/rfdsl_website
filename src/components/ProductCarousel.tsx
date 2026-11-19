@@ -26,7 +26,8 @@ const FLICK_PX = 40; // a drag shorter than one panel but longer than this still
 //   drag or swipe only moves the row. Hovering (or keyboard focus) fades in a
 //   navy tint over the image and types the description out once, exactly like
 //   the industry images above.
-// - Arrow keys step through it when it has keyboard focus; tabbing to a
+// - The round arrow buttons on the left and right (and the arrow keys when
+//   it has keyboard focus) move it one panel at a time; tabbing to a
 //   product slides it into view.
 // - It pauses while hovered by a mouse, while it has keyboard focus, while
 //   dragging and while the tab is hidden, and never moves on its own for
@@ -73,9 +74,14 @@ export default function ProductCarousel({ products, className }: { products: Pro
     return () => clearInterval(timer);
   }, [hovered, focusedWithin, tabHidden, dragging]);
 
+  // Very fast repeated clicks/keys keep restarting the slide, so the shift back
+  // into the middle copy waits; stop at the ends of the 3 copies until it happens.
   const move = (panels: number) => {
     setAnimate(true);
-    setIndex((i) => i + panels);
+    setIndex((i) => {
+      const next = i + panels;
+      return next < 0 || next > 3 * count - 4 ? i : next;
+    });
   };
 
   // After a move ends, shift back into the middle copy without animation.
@@ -167,116 +173,158 @@ export default function ProductCarousel({ products, className }: { products: Pro
 
   return (
     <div
-      ref={viewportRef}
       role="region"
       aria-roledescription="carousel"
-      aria-label="Popular products (drag, swipe or use the arrow keys)"
-      tabIndex={0}
+      aria-label="Popular products (drag, swipe, use the arrow buttons or the arrow keys)"
       onKeyDown={onKeyDown}
       onFocus={() => setFocusedWithin(true)}
       onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setFocusedWithin(false)}
       // Hover pause is for a real mouse only (taps on touch screens also fire "enter").
       onPointerEnter={(e) => e.pointerType === "mouse" && setHovered(true)}
       onPointerLeave={(e) => e.pointerType === "mouse" && setHovered(false)}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={(e) => endPress(e, false)}
-      onPointerCancel={(e) => endPress(e, true)}
-      onClickCapture={onClickCapture}
-      onDragStart={(e) => e.preventDefault()}
       // --n: panels visible at once by window width: 1 below 450px, 2 from 450px,
       // 3 from 600px, 4 from 1250px. --gap: space between panels (matches the industry images).
-      // touch-pan-y: the browser keeps vertical scrolling, horizontal swipes drag the row.
-      className={`touch-pan-y overflow-hidden rounded-lg outline-none select-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-4 [--gap:16px] [--n:1] min-[450px]:[--n:2] min-[600px]:[--n:3] lg:[--gap:24px] min-[1250px]:[--n:4] ${
-        dragging ? "cursor-grabbing" : "cursor-grab"
-      } ${className ?? ""}`}
+      // @container: lets the arrow buttons find the panels' image centre (via cqw).
+      className={`@container relative [--gap:16px] [--n:1] min-[450px]:[--n:2] min-[600px]:[--n:3] lg:[--gap:24px] min-[1250px]:[--n:4] ${
+        className ?? ""
+      }`}
     >
+      <ArrowButton direction="prev" onClick={() => move(-1)} />
       <div
-        ref={trackRef}
-        onTransitionEnd={onTransitionEnd}
-        className="flex gap-(--gap)"
-        style={{
-          // One step = one panel width + one gap; while dragging, follow the pointer.
-          transform: `translateX(calc(${-index} * (100% + var(--gap)) / var(--n) + ${dragPx ?? 0}px))`,
-          transition: animate && !dragging ? `transform ${SLIDE_MS}ms cubic-bezier(0.65, 0, 0.35, 1)` : "none",
-        }}
+        ref={viewportRef}
+        tabIndex={0}
+        aria-label="Product list"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={(e) => endPress(e, false)}
+        onPointerCancel={(e) => endPress(e, true)}
+        onClickCapture={onClickCapture}
+        onDragStart={(e) => e.preventDefault()}
+        // touch-pan-y: the browser keeps vertical scrolling, horizontal swipes drag the row.
+        className={`touch-pan-y overflow-hidden rounded-lg outline-none select-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-4 ${
+          dragging ? "cursor-grabbing" : "cursor-grab"
+        }`}
       >
-        {slides.map((product, i) => {
-          const isCopy = i < count || i >= 2 * count;
-          const descriptionId = `${baseId}-${i}`;
-          const isActive = activeSlide === i;
-          return (
-            <div
-              key={i}
-              role="group"
-              aria-roledescription="slide"
-              aria-label={isCopy ? undefined : `${i - count + 1} of ${count}: ${product.name}`}
-              aria-hidden={isCopy || undefined}
-              className="shrink-0 basis-[calc((100%-(var(--n)-1)*var(--gap))/var(--n))]"
-            >
-              {/* Frame (1px slate border, 1px white gap, slightly rounded corners) linking to the product page. */}
-              <Link
-                href={product.href}
-                prefetch={false}
-                draggable={false}
-                tabIndex={isCopy ? -1 : undefined}
-                aria-label={product.name}
-                aria-describedby={product.description && !isCopy ? descriptionId : undefined}
-                // Mouse hover / keyboard focus show the description; a tap on touch screens opens the page.
-                onPointerEnter={(e) => e.pointerType === "mouse" && showDescription(i)}
-                onPointerLeave={(e) => e.pointerType === "mouse" && hideDescription(i)}
-                onFocus={() => {
-                  if (isCopy) return;
-                  revealSlide(i);
-                  showDescription(i);
-                }}
-                onBlur={() => hideDescription(i)}
-                className="block rounded-lg border border-slate-300 bg-white p-px outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2"
+        <div
+          ref={trackRef}
+          onTransitionEnd={onTransitionEnd}
+          className="flex gap-(--gap)"
+          style={{
+            // One step = one panel width + one gap; while dragging, follow the pointer.
+            transform: `translateX(calc(${-index} * (100% + var(--gap)) / var(--n) + ${dragPx ?? 0}px))`,
+            transition: animate && !dragging ? `transform ${SLIDE_MS}ms cubic-bezier(0.65, 0, 0.35, 1)` : "none",
+          }}
+        >
+          {slides.map((product, i) => {
+            const isCopy = i < count || i >= 2 * count;
+            const descriptionId = `${baseId}-${i}`;
+            const isActive = activeSlide === i;
+            return (
+              <div
+                key={i}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={isCopy ? undefined : `${i - count + 1} of ${count}: ${product.name}`}
+                aria-hidden={isCopy || undefined}
+                className="shrink-0 basis-[calc((100%-(var(--n)-1)*var(--gap))/var(--n))]"
               >
-                <div className="overflow-hidden rounded-[6px] bg-white">
-                  {/* Product photo, centered on white and never cropped. */}
-                  <div className="@container relative aspect-square">
-                    <Image
-                      src={product.src}
-                      alt={isCopy ? "" : product.name}
-                      fill
-                      draggable={false}
-                      sizes="(min-width: 1536px) 366px, (min-width: 1250px) 25vw, (min-width: 600px) 33vw, (min-width: 450px) 50vw, 100vw"
-                      className="object-contain p-[10%]"
-                    />
-                    {/*
-                      Description, as on the industry images: a navy tint fades
-                      in over the photo and the text types out once per hover,
-                      centered in white. Text size and padding scale with the
-                      panel width. Screen readers get the full text straight away.
-                    */}
-                    {product.description && (
-                      <>
-                        <span
-                          aria-hidden="true"
-                          className={`absolute inset-0 bg-[#0b1f45]/85 transition-opacity duration-300 ${
-                            isActive ? "opacity-100" : "opacity-0"
-                          }`}
-                        />
-                        <span className="absolute inset-0 flex items-center justify-center p-[clamp(10px,7cqw,28px)] text-center text-[clamp(12px,4.6cqw,16px)] leading-[1.45] text-white/95">
-                          {isActive && <TypingText key={activation} text={product.description} />}
-                        </span>
-                        <span id={descriptionId} className="sr-only">
-                          {product.description}
-                        </span>
-                      </>
-                    )}
+                {/* Frame (1px slate border, 1px white gap, slightly rounded corners) linking to the product page. */}
+                <Link
+                  href={product.href}
+                  prefetch={false}
+                  draggable={false}
+                  tabIndex={isCopy ? -1 : undefined}
+                  aria-label={product.name}
+                  aria-describedby={product.description && !isCopy ? descriptionId : undefined}
+                  // Mouse hover / keyboard focus show the description; a tap on touch screens opens the page.
+                  onPointerEnter={(e) => e.pointerType === "mouse" && showDescription(i)}
+                  onPointerLeave={(e) => e.pointerType === "mouse" && hideDescription(i)}
+                  onFocus={() => {
+                    if (isCopy) return;
+                    revealSlide(i);
+                    showDescription(i);
+                  }}
+                  onBlur={() => hideDescription(i)}
+                  // cursor-[inherit]: show the row's grab / grabbing hand instead of the link's pointing hand.
+                  className="block cursor-[inherit] rounded-lg border border-slate-300 bg-white p-px outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2"
+                >
+                  <div className="overflow-hidden rounded-[6px] bg-white">
+                    {/* Product photo, centered on white and never cropped. */}
+                    <div className="@container relative aspect-square">
+                      <Image
+                        src={product.src}
+                        alt={isCopy ? "" : product.name}
+                        fill
+                        draggable={false}
+                        sizes="(min-width: 1536px) 366px, (min-width: 1250px) 25vw, (min-width: 600px) 33vw, (min-width: 450px) 50vw, 100vw"
+                        className="object-contain p-[10%]"
+                      />
+                      {/*
+                        Description, as on the industry images: a navy tint fades
+                        in over the photo and the text types out once per hover,
+                        centered in white. Text size and padding scale with the
+                        panel width. Screen readers get the full text straight away.
+                      */}
+                      {product.description && (
+                        <>
+                          <span
+                            aria-hidden="true"
+                            className={`absolute inset-0 bg-[#0b1f45]/85 transition-opacity duration-300 ${
+                              isActive ? "opacity-100" : "opacity-0"
+                            }`}
+                          />
+                          <span className="absolute inset-0 flex items-center justify-center p-[clamp(10px,7cqw,28px)] text-center text-[clamp(12px,4.6cqw,16px)] leading-[1.45] text-white/95">
+                            {isActive && <TypingText key={activation} text={product.description} />}
+                          </span>
+                          <span id={descriptionId} className="sr-only">
+                            {product.description}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    {/* Name strip: black background, white text. */}
+                    <p className="bg-black px-3 py-3 text-center text-[15px] font-semibold tracking-tight text-white lg:py-4 lg:text-base">
+                      {product.name}
+                    </p>
                   </div>
-                  {/* Name strip: black background, white text. */}
-                  <p className="bg-black px-3 py-3 text-center text-[15px] font-semibold tracking-tight text-white lg:py-4 lg:text-base">
-                    {product.name}
-                  </p>
-                </div>
-              </Link>
-            </div>
-          );
-        })}
+                </Link>
+              </div>
+            );
+          })}
+        </div>
       </div>
+      <ArrowButton direction="next" onClick={() => move(1)} />
     </div>
+  );
+}
+
+// Round previous / next button floating just inside the first and last visible
+// panels, vertically centred on the product photo (the photo is square, so its
+// centre sits half a panel width down: panel width = (100cqw - gaps) / n).
+// White glass disc with a navy chevron; turns navy with a white chevron on hover.
+function ArrowButton({ direction, onClick }: { direction: "prev" | "next"; onClick: () => void }) {
+  const prev = direction === "prev";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={prev ? "Previous products" : "Next products"}
+      className={`absolute top-[calc((100cqw-(var(--n)-1)*var(--gap))/var(--n)/2)] z-10 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/90 text-[#0b1f45] shadow-[0_8px_24px_-8px_rgb(11_31_69/0.5)] ring-1 ring-slate-200 backdrop-blur-sm transition duration-200 outline-none hover:bg-[#0b1f45] hover:text-white hover:ring-[#0b1f45] focus-visible:ring-2 focus-visible:ring-sky-400 active:scale-90 sm:size-12 ${
+        prev ? "left-2.5 sm:left-3.5" : "right-2.5 sm:right-3.5"
+      }`}
+    >
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2.25}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={`size-5 sm:size-6 ${prev ? "-translate-x-px" : "translate-x-px"}`}
+      >
+        <path d={prev ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"} />
+      </svg>
+    </button>
   );
 }
