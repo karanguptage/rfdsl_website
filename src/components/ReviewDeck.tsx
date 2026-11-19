@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 export type Review = {
@@ -8,13 +7,11 @@ export type Review = {
   email: string;
   phone: string;
   text: string;
-  photo?: string; // customer photo (e.g. /reviews/jane.jpg); initials are shown without one
 };
 
-// One colour scheme for every card: a muted champagne-gold border (echoing the
-// gold stars), navy initials avatars (the banner's colour) and a gold rule.
+// One colour scheme for every card: a muted champagne-gold border and rule,
+// echoing the gold stars at the top of the card.
 const CARD_BORDER = "border-[#c9a96e]";
-const AVATAR_BG = "from-[#1e3a6e] to-[#0b1f45]";
 const RULE_BG = "from-transparent via-[#c9a96e] to-transparent";
 
 // Tilt (degrees) of the top card and the cards under it. The cards are the
@@ -25,14 +22,6 @@ const TILTS = [0, -4, 3.5, -2.5];
 const FLY_MS = 320; // top card flying out to the side (or the bottom card coming out)
 const SWIPE_PX = 80; // drag distance that sends the top card away
 const DRAG_START_PX = 6;
-
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 
 // A stack of review cards: one card on top, the rest underneath like a deck.
 // - Next (→ button, → key, or dragging/swiping the top card either way): the top
@@ -185,24 +174,11 @@ export default function ReviewDeck({ reviews, className }: { reviews: Review[]; 
               style={cardStyle(i)}
               className={`flex flex-col items-center justify-center rounded-2xl border-2 bg-white px-4 py-6 text-center shadow-[0_18px_40px_-18px_rgb(0_0_0/0.7)] [grid-area:1/1] sm:px-7 sm:py-8 ${CARD_BORDER}`}
             >
-              {/* Avatar: customer photo, or their initials on a coloured circle. */}
-              <span
-                className={`relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-linear-to-br text-xl font-bold text-white shadow-md ring-4 ring-white sm:size-20 sm:text-2xl ${AVATAR_BG}`}
-              >
-                {review.photo ? (
-                  <Image src={review.photo} alt="" fill sizes="80px" draggable={false} className="object-cover" />
-                ) : (
-                  initials(review.name)
-                )}
-              </span>
-              <h3 className="mt-3 text-lg leading-tight font-bold text-neutral-950 sm:text-xl">{review.name}</h3>
+              {/* Rating: large gold stars heading the card. */}
+              <StarRating starClassName="size-7 sm:size-8" className="text-[28px] sm:text-[32px]" />
+              <h3 className="mt-4 text-lg leading-tight font-bold text-neutral-950 sm:mt-5 sm:text-xl">{review.name}</h3>
               <p title={review.email} className="mt-1 max-w-full truncate text-xs text-slate-500 sm:text-sm">{review.email}</p>
               <p className="text-xs text-slate-500 sm:text-sm">{review.phone}</p>
-              <div aria-label="5 out of 5 stars" role="img" className="mt-3 flex gap-0.5 text-amber-400">
-                {Array.from({ length: 5 }, (_, s) => (
-                  <Star key={s} className="size-4" />
-                ))}
-              </div>
               <span aria-hidden="true" className={`mt-4 h-0.5 w-12 shrink-0 rounded-full bg-linear-to-r ${RULE_BG}`} />
               <blockquote className="mt-4 text-[14px] leading-relaxed text-slate-700 sm:text-[15px]">
                 “{review.text}”
@@ -237,7 +213,24 @@ function DeckButton({ label, onClick, path }: { label: string; onClick: () => vo
   );
 }
 
-export function Star({ className }: { className?: string }) {
+// The five-star rating at the top of each review card: a row of gold stars
+// with a faint warm shadow so they read as the card's emblem. `starClassName`
+// sets the star size; the gap scales with it.
+export function StarRating({ starClassName, className }: { starClassName: string; className?: string }) {
+  return (
+    <div
+      aria-label="5 out of 5 stars"
+      role="img"
+      className={`flex shrink-0 items-center justify-center gap-[0.2em] text-amber-400 drop-shadow-[0_2px_3px_rgb(180_120_20/0.3)] ${className ?? ""}`}
+    >
+      {Array.from({ length: 5 }, (_, s) => (
+        <Star key={s} className={starClassName} />
+      ))}
+    </div>
+  );
+}
+
+function Star({ className }: { className?: string }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className={className}>
       <path d="M12 2.5l2.94 5.96 6.58.96-4.76 4.64 1.12 6.55L12 17.52l-5.88 3.09 1.12-6.55L2.48 9.42l6.58-.96L12 2.5z" />

@@ -2,9 +2,8 @@ import type { Review } from "@/components/ReviewDeck";
 
 // Customer reviews: the home page card deck and the About Us carousel.
 // PLACEHOLDER CONTENT: these are sample reviews, not real customers. Replace
-// them with genuine reviews (and only show a customer's photo, email and phone
-// with their permission) before the site goes live. `photo` is optional,
-// e.g. "/reviews/sarah.jpg" in public/reviews; initials are shown without it.
+// them with genuine reviews (and only show a customer's email and phone with
+// their permission) before the site goes live.
 export const REVIEWS: Review[] = [
   {
     name: "Sarah Mitchell",

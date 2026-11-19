@@ -1,21 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { Star, type Review } from "@/components/ReviewDeck";
+import { StarRating, type Review } from "@/components/ReviewDeck";
 
 const STEP_EVERY_MS = 4000; // time between automatic moves
 const SLIDE_MS = 700; // duration of each move
 const DRAG_START_PX = 6; // movement before a press counts as a drag
 const FLICK_PX = 40; // a short drag past this still moves one card
-
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 
 // Customer reviews as a looping row of cards (About Us page).
 // - Cards visible at once: 5 from 1280px, 4 from 1100px, 3 from 900px, 2 from
@@ -24,9 +15,9 @@ const initials = (name: string) =>
 //   focused, and drag / swipe either way; it settles on the nearest card.
 // - Pauses while hovered, focused, dragged or the tab is hidden; never moves on
 //   its own for visitors who prefer reduced motion.
-// Cards: white with the same slate border as the other panels. Rows: a large
-// centred avatar (photo or navy initials), then name, email and phone, the five
-// stars, and the review below a thin divider.
+// Cards: white with the same slate border as the other panels. Rows: the five
+// gold stars, large and centred, then name, email and phone, and the review
+// below a thin divider.
 export default function ReviewCarousel({ reviews, title }: { reviews: Review[]; title: React.ReactNode }) {
   const count = reviews.length;
   // Rendered three times; the view stays in the middle copy so there is always
@@ -168,29 +159,17 @@ export default function ReviewCarousel({ reviews, title }: { reviews: Review[]; 
                 aria-label={isCopy ? undefined : `${i - count + 1} of ${count}: ${review.name}`}
                 className="flex min-w-0 shrink-0 basis-[calc((100%-(var(--n)-1)*var(--gap))/var(--n))] flex-col rounded-lg border border-slate-300 bg-white p-5 lg:p-6"
               >
-                {/* Row 1: avatar on its own, large and centred (photo, or navy initials). */}
-                <span className="relative flex size-[72px] shrink-0 items-center justify-center self-center overflow-hidden rounded-full bg-linear-to-br from-[#1e3a6e] to-[#0b1f45] text-2xl font-bold text-white shadow-[0_10px_24px_-12px_rgb(11_31_69/0.6)] ring-4 ring-white outline outline-1 outline-offset-4 outline-slate-300 lg:size-20">
-                  {review.photo ? (
-                    <Image src={review.photo} alt="" fill sizes="80px" draggable={false} className="object-cover" />
-                  ) : (
-                    initials(review.name)
-                  )}
-                </span>
+                {/* Row 1: the rating, large gold stars centred at the top. */}
+                <StarRating starClassName="size-6 lg:size-7" className="pt-1 text-[24px] lg:text-[28px]" />
                 {/* Row 2: name, email and phone. */}
-                <div className="mt-5 min-w-0 text-center">
+                <div className="mt-4 min-w-0 text-center lg:mt-5">
                   <h3 className="truncate text-base leading-tight font-bold text-neutral-950">{review.name}</h3>
                   <p title={review.email} className="mt-1 truncate text-xs text-slate-500">
                     {review.email}
                   </p>
                   <p className="text-xs text-slate-500">{review.phone}</p>
                 </div>
-                {/* Row 3: rating. */}
-                <div aria-label="5 out of 5 stars" role="img" className="mt-4 flex justify-center gap-1 text-amber-400">
-                  {Array.from({ length: 5 }, (_, s) => (
-                    <Star key={s} className="size-5" />
-                  ))}
-                </div>
-                {/* Row 4: the review. */}
+                {/* Row 3: the review. */}
                 <blockquote className="mt-4 border-t border-slate-200 pt-4 text-sm leading-relaxed text-slate-700">
                   “{review.text}”
                 </blockquote>
